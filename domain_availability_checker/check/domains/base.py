@@ -4,7 +4,7 @@ import requests
 
 from .domain_info import DomainInfo, DomainStatus
 
-class DomainBase(ABC):
+class Domain(ABC):
     def __init__(self):
         self._domain:str = None
         self._RDAP_url:str = "https://rdap.org/{type}/{domain}"
@@ -14,8 +14,13 @@ class DomainBase(ABC):
 
     def __repr__(self):
         cls = self.__class__.__name__
-        domain = self._domain or "-"
-        return f"<ClassName {cls} domain={domain}>"
+        if self._domain_info:
+            domain = self._domain_info.domain
+            status = self._domain_info.status
+        else:
+            domain = None
+            status = None
+        return f"Class={cls} DomainInfo(domain={domain} status={status})"
     
     def get(self, domain:str, timeout:float=10.0) -> Self:
         self._domain = domain
@@ -27,13 +32,30 @@ class DomainBase(ABC):
             self._domain_info = self._loads(status)
             return self
         status = self._initial_status(resp.status_code)
+        self.rdap_result = resp
         self._domain_info = self._loads(status)
         return self
     
-    def _loads(self, domain_status:DomainStatus) -> DomainInfo:
+    @property
+    def rdap_result(self) -> Dict[str, Any]:
+        if not self._RDAP_result:
+            raise RuntimeError("RDAP result not set")
+        return self._RDAP_result
+    
+    @rdap_result.setter
+    def rdap_result(self, value:requests.Response):
+        if value:
+            self._RDAP_result = value.json()
+        else:
+            self._RDAP_result = None
+
+    def _loads(
+            self, 
+            domain_status:DomainStatus) -> DomainInfo:
         """
         Loads detailed information about domain
         """
+
         if domain_status == DomainStatus.ERROR:
             return DomainInfo(
                 domain=self._domain,
@@ -46,7 +68,8 @@ class DomainBase(ABC):
             )
         if domain_status == DomainStatus.UNKNOWN:
             return DomainInfo(
-                domain=self._status,
+                domain=self._domain,
+                status=self._status()
             )
     
     @staticmethod
@@ -62,18 +85,16 @@ class DomainBase(ABC):
             return DomainStatus.ERROR
         return DomainStatus.UNKNOWN
 
-    @property
     def domain_info(self) -> DomainInfo:
         if not self._domain_info:
             raise RuntimeError("Domain info has to be rendered with the help of .get() method")
         return self._domain_info
-    
-    def domain_status(self) -> DomainStatus:
-        return self.domain_info.status
 
-    @property
     @abstractmethod
     def _status(self) -> DomainStatus:
+        """
+        Searches rdap result for status information 
+        """
         raise NotImplementedError
     
 

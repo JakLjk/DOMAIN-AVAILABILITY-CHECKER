@@ -8,6 +8,9 @@ class DomainStatus(Enum):
     UNKNOWN = auto()
     ERROR = auto()
 
+    def __str__(self):
+        return self.name
+
 @dataclass
 class DomainInfo:
     domain:str
