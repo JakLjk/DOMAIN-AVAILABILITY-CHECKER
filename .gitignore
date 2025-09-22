@@ -1,4 +1,6 @@
 test.json
+domain_availability_checker/auto_check/dictionaries/*
+!domain_availability_checker/auto_check/dictionaries/.gitkeep
 
 # General
 .DS_Store
