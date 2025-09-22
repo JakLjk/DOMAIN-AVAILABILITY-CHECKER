@@ -152,7 +152,8 @@ class AutoCheck:
                 if check_interval_s:
                     sleep(check_interval_s)
         print("Finished checking domain avaiability")
-        print(summary)
+        if print_summary:
+            print(summary)
     
 
 
