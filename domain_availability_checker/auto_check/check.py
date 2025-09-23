@@ -127,16 +127,25 @@ class AutoCheck:
                           num_records:int=5, 
                           check_interval_s:float=5,
                           print_summary=True,
-                          recheck_unknown:bool=True):
+                          recheck_throttled:bool=False):
         print(f"Initialising connection to table {dictionary_name}")
         DomainsTable = self._get_table(dictionary_name)
-        stmt = (
-            select(DomainsTable)
-            .where(DomainsTable.was_checked.is_(False))
-            .order_by(DomainsTable.frequency.desc())
-            .limit(num_records)
-        )
-        print(f"Querying top {num_records} to check")
+        if recheck_throttled:
+            print(f"Rechecking statements with status = THROTTLED")
+            stmt = (
+                select(DomainsTable)
+                .where(DomainsTable.status == "THROTTLED")
+                .order_by(DomainsTable.frequency.desc())
+                .limit(num_records)
+            )
+        else:
+            stmt = (
+                select(DomainsTable)
+                .where(DomainsTable.was_checked.is_(False))
+                .order_by(DomainsTable.frequency.desc())
+                .limit(num_records)
+            )
+        print(f"Querying top {num_records} to check.")
         summary = Summary()
         with Session(self._pg_engine) as session:
             result = session.scalars(stmt).all()

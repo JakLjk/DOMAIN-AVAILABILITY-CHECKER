@@ -7,6 +7,7 @@ class DomainStatus(Enum):
     AVAILABLE = auto()
     UNKNOWN = auto()
     ERROR = auto()
+    THROTTLED = auto()
 
     def __str__(self):
         return self.name

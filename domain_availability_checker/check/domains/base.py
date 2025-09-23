@@ -44,8 +44,8 @@ class Domain(ABC):
                     if not data:
                         break
                     response += data
-        response = response.decode("utf-8", errors="ignore")
-        status = self._status(response)
+        self._whois_response = response.decode("utf-8", errors="ignore")
+        status = self._status(self._whois_response )
         self._domain_info = self._loads(status)
         return self
 

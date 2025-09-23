@@ -36,14 +36,14 @@ def check_domains(
 
 
 default_dag_args = {
-    "owner":"ownername",
+    "owner":"pomeran",
     "retries":5,
     "retry_delay":timedelta(minutes=30)
 }
 
 
 with DAG(
-    dag_id="domains_availability_checker_v01",
+    dag_id="dag_check_domains_pl_dict_v07",
     default_args=default_dag_args,
     start_date=datetime(2025,9,22),
     schedule="@hourly",
@@ -67,10 +67,9 @@ with DAG(
             "pgport": "{{ conn['conn-pg-domains-db'].port}}",
             "pgdb": "{{ conn['conn-pg-domains-db'].schema}}",
             "dictname":"words_tld_pl",
-            "numrecords":50,
-            "interval":60,
+            "numrecords":5,
+            "interval":300,
             "print_summary":True,
 
         }
     )
-

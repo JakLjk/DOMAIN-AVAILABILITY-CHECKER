@@ -14,6 +14,8 @@ class DomainPL(Domain):
     def _status(self, response) ->DomainStatus:
         if "No information available" in response:
             return DomainStatus.AVAILABLE
+        elif "request limit exceeded" in response:
+            return DomainStatus.THROTTLED
         elif "DOMAIN NAME:" in response:
             return DomainStatus.REGISTERED
         else:
