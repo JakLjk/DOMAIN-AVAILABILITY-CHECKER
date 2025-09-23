@@ -14,38 +14,46 @@ def load_args():
 
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--dictname", type=str, help="Dictionary table name", required=True)
+    common.add_argument("--pguser", type=str, default=os.getenv("PG_USER"),required=False)
+    common.add_argument("--pgpass", type=str, default=os.getenv("PG_PASSWORD"), required=False)
+    common.add_argument("--pghost", type=str, default=os.getenv("PG_HOST"), required=False)
+    common.add_argument("--pgport", type=int, default=int(os.getenv("PG_PORT")), required=False)
+    common.add_argument("--pgdb", type=str, default=os.getenv("PG_DATABASE"), required=False)
+
 
 
     load_p = subparsers.add_parser("load", parents=[common], help="Load dictionary")
-    load_p.add_argument("--path", default=os.getenv(), type=Path, required=True)
+    load_p.add_argument("--path", type=Path, required=True)
     load_p.add_argument("--namecol", type=str, required=True)
     load_p.add_argument("--freqcol", type=str, required=True)
     load_p.add_argument("--tld_suffix", type=str, required=True)
     load_p.add_argument("--prefix", type=str, default="")
-    load_p.add_argument("--overwrite_dict", action="store_true")  # boolean flag
+    load_p.add_argument("--overwrite_dict", action="store_true")
 
 
     check_p = subparsers.add_parser("check", parents=[common], help="Check availability")
     check_p.add_argument("--numchecks", type=int, default=5)
     check_p.add_argument("--interval", type=float, default=5.0)
-    check_p.add_argument("--print_summary", action="store_true")
-    check_p.add_argument("--no-print_summary", dest="print_summary", action="store_false")
+    check_p.add_argument("--print-summary", action="store_true")
+    check_p.add_argument("--no-print-summary", dest="print-summary", action="store_false")
     check_p.set_defaults(print_summary=True)
+
+    return parser.parse_args()
 
 
 def main():
     args = load_args()
     auto_check = AutoCheck()
     auto_check.init_postgres(
-        user=os.getenv("PG_USER"),
-        password=os.getenv("PG_PASSWORD"),
-        host=os.getenv("PG_HOST"),
-        port=int(os.getenv("PG_PORT")),
-        database=os.getenv("PG_DATABASE")
+        user=args.pguser,
+        password=args.pgpass,
+        host=args.pghost,
+        port=args.pgport,
+        database=args.pgdb
     )
     if args.command == "load":
         auto_check.load_file_to_postgres_dictionary(
-            file_path=args.load.path,
+            file_path=str(args.path),
             name_col=args.namecol,
             frequency_col=args.freqcol,
             dictionary_table_name=args.dictname,
@@ -53,7 +61,7 @@ def main():
             tld_suffix=args.tld_suffix,
             overwrite_dictionary_table=args.overwrite_dict
         )
-    if args.command == "check":
+    elif args.command == "check":
         auto_check.check_top_n_names(
             dictionary_name=args.dictname,
             num_records=args.numchecks,

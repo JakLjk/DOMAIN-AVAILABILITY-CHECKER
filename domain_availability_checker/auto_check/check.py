@@ -5,11 +5,11 @@ import numpy as np
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from domain_availability_checker.auto_check.postgres.sink_table import initialise_domains_table
+from .postgres.sink_table import initialise_domains_table
 
-from domain_availability_checker.check.domains.base import Domain
-from domain_availability_checker.check.domains.domain_info import DomainStatus
-from domain_availability_checker.check.availability import check_domain
+from ..check.domains.base import Domain
+from ..check.domains.domain_info import DomainStatus
+from ..check.availability import check_domain
 
 class Summary:
     def __init__(self):
@@ -124,7 +124,8 @@ class AutoCheck:
                           dictionary_name:str, 
                           num_records:int=5, 
                           check_interval_s:float=5,
-                          print_summary=True):
+                          print_summary=True,
+                          recheck_unknown:bool=True):
         print(f"Initialising connection to table {dictionary_name}")
         DomainsTable = self._get_table(dictionary_name)
         stmt = (
