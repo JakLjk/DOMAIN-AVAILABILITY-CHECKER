@@ -108,6 +108,8 @@ class AutoCheck:
         df[name_col] = prefix + df[name_col] + tld_suffix
         df[freq_col] = pd.to_numeric(df[freq_col], errors="coerce")
         df = df.dropna(subset=[name_col, freq_col])
+        df = df.sort_values(freq_col, ascending=False)\
+                .drop_duplicates(subset=[name_col], keep="first")
         print("Returning cleaned DataFrame")
         return df
     
