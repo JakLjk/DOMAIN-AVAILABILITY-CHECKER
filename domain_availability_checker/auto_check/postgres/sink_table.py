@@ -20,8 +20,12 @@ def initialise_domains_table(table_name:str):
         registered_to: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
         was_checked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
         checked_at: Mapped[datetime] = mapped_column(
-            TIMESTAMP(timezone=True), server_default=func.now(),
-            nullable=True)
+            TIMESTAMP(timezone=True), 
+            server_default=func.now(),
+            onupdate=func.now(),
+            nullable=False)
+        times_rechecked: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+        message: Mapped[str] = mapped_column(String(), nullable=True)
         error_message: Mapped[str] = mapped_column(String(), nullable=True)
 
     return DomainsTable

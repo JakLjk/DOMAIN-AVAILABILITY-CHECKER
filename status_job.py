@@ -26,9 +26,9 @@ def load_args():
     load_p.add_argument("--path", type=Path, required=True)
     load_p.add_argument("--namecol", type=str, required=True)
     load_p.add_argument("--freqcol", type=str, required=True)
-    load_p.add_argument("--tld_suffix", type=str, required=True)
+    load_p.add_argument("--tld-suffix", type=str, required=True)
     load_p.add_argument("--prefix", type=str, default="")
-    load_p.add_argument("--overwrite_dict", action="store_true")
+    load_p.add_argument("--overwrite-dict", action="store_true")
 
 
     check_p = subparsers.add_parser("check", parents=[common], help="Check availability")

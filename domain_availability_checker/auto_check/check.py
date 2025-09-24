@@ -17,7 +17,8 @@ class Summary:
             DomainStatus.AVAILABLE:0,
             DomainStatus.UNKNOWN:0,
             DomainStatus.ERROR:0,
-            DomainStatus.REGISTERED:0
+            DomainStatus.REGISTERED:0,
+            DomainStatus.THROTTLED:0
         }
 
     def __str__(self):
@@ -134,7 +135,9 @@ class AutoCheck:
             print(f"Rechecking statements with status = THROTTLED")
             stmt = (
                 select(DomainsTable)
-                .where(DomainsTable.status == "THROTTLED")
+                .where(
+                    DomainsTable.status == "THROTTLED",
+                    DomainsTable.times_rechecked < 1)
                 .order_by(DomainsTable.frequency.desc())
                 .limit(num_records)
             )
@@ -159,6 +162,8 @@ class AutoCheck:
                 row.domain_punycode = domain.punycode_string
                 row.domain_ascii = domain.ascii_string
                 row.error_message = domain.error_message
+                if recheck_throttled:
+                    row.times_rechecked += 1
                 session.commit()
                 summary.add_status(domain.domain_info().status)
                 if check_interval_s:
